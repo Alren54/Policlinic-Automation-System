@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class Muayene
 {
-    private string Randevu_ID { get; set; }
-    private string Prescription { get; set; }
-    private string Report { get; set; }
-    private float Price {  get; set; }
-    private string Diagnosis { get; set; }
-    private string Sevk { get; set; }
-    private bool isPaid { get; set; }
+    public string Randevu_ID { get; set; }
+    public string Prescription { get; set; }
+    public string Report { get; set; }
+    public float Price {  get; set; }
+    public string Diagnosis { get; set; }
+    public bool Sevk { get; set; }
+    public bool isPaid { get; set; }
+    public string SevkLocation { get; set; }
 }

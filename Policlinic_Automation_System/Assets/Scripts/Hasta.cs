@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class Hasta
 {
-    private string ID { get; set; }
-    private string Name { get; set; }
-    private string Surname { get; set; }
-    private DateTime BirthDate { get; set; }
-    private bool isInsured { get; set; }
-    private List<Randevu> RandevuList { get; set; }
+    public string ID { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
+    public DateTime BirthDate { get; set; }
+    public bool isInsured { get; set; }
+    public List<Randevu> RandevuList { get; set; }
 }

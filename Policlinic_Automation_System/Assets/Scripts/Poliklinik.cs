@@ -5,6 +5,6 @@ using UnityEngine;
 
 public class Poliklinik
 {
-    private string Name { get; set; }
-    private List<Doktor> DoktorList { get; set; }
+    public string Name { get; set; }
+    public List<Doktor> DoktorList { get; set; }
 }
