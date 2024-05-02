@@ -7,20 +7,22 @@ public class ButtonManager : MonoBehaviour
 {
 
     [Header("Panels")]
-    private GameObject LoginPanel;
-    private GameObject RegisterPanel;
-    private GameObject PatientMainScreenPanel;
-    private GameObject PatientTakeRendezvousPanel;
-    private GameObject PatientExaminationPanel;
-    private GameObject DebtsPanel;
-    private GameObject SettingsPanel;
-    private GameObject ExaminationInfoPanel;
-    private GameObject PayingPanel;
-    private GameObject CreditCardPanel;
+    [SerializeField] private GameObject LoginPanel;
+    [SerializeField] private GameObject RegisterPanel;
+    [SerializeField] private GameObject PatientMainScreenPanel;
+    [SerializeField] private GameObject PatientTakeRendezvousPanel;
+    [SerializeField] private GameObject PatientExaminationPanel;
+    [SerializeField] private GameObject DebtsPanel;
+    [SerializeField] private GameObject SettingsPanel;
+    [SerializeField] private GameObject ExaminationInfoPanel;
+    [SerializeField] private GameObject PayingPanel;
+    [SerializeField] private GameObject CreditCardPanel;
 
     [Header("Input Fields")]
-    private List<GameObject> LoginIFields;
-    private List<GameObject> RegisterIFields;
+    [SerializeField] private List<GameObject> LoginIFields;
+    [SerializeField] private List<GameObject> RegisterIFields;
+    [SerializeField] private List<GameObject> SettingsIFields;
+    [SerializeField] private List<GameObject> CreditCardIFields;
 
     #region Login Panel Buttons
     public void LP_LoginButton()
@@ -47,7 +49,7 @@ public class ButtonManager : MonoBehaviour
         string birthday = ConvertFromIF(RegisterIFields[2]);
         string insurance = ConvertFromIF(RegisterIFields[3]);
         string password = ConvertFromIF(RegisterIFields[4]);
-        if(NotNull(id) && NotNull(name) && NotNull(birthday) && NotNull(insurance) && NotNull(password))
+        if (NotNull(id) && NotNull(name) && NotNull(birthday) && NotNull(insurance) && NotNull(password))
         {
 
         }
@@ -60,7 +62,7 @@ public class ButtonManager : MonoBehaviour
         PatientTakeRendezvousPanel.SetActive(true);
     }
 
-    public void SidePanel_ExaminationPanelButton()
+    public void SidePanel_MyExaminationsButton()
     {
         CloseAllPanels();
         PatientExaminationPanel.SetActive(true);
@@ -84,12 +86,84 @@ public class ButtonManager : MonoBehaviour
         LoginPanel.SetActive(true);
     }
     #endregion
-    #region Prefab Functions
-    public void RendezvousPrefab(int element)
+    #region Settings Panel Buttons
+    public void SetP_UpdatePassword()
     {
-        switch(element)
+        string password = ConvertFromIF(SettingsIFields[0]);
+    }
+    public void SetP_SaveCreditCard()
+    {
+        string cardName = ConvertFromIF(SettingsIFields[1]);
+        string cardNo = ConvertFromIF(SettingsIFields[2]);
+        string endDate = ConvertFromIF(SettingsIFields[3]);
+        string CVV = ConvertFromIF(SettingsIFields[4]);
+    }
+    #endregion
+    #region Paying Panel Buttons
+    public void PP_PayWithCash()
+    {
+
+    }
+    public void PP_PayWithCard()
+    {
+        CreditCardPanel.SetActive(true);
+        PayingPanel.SetActive(false);
+    }
+    #endregion
+    #region Credit Card Panel Buttons
+    public void CC_Pay()
+    {
+        string cardName = ConvertFromIF(CreditCardIFields[0]);
+        string cardNo = ConvertFromIF(CreditCardIFields[1]);
+        string endDate = ConvertFromIF(CreditCardIFields[2]);
+        string CVV = ConvertFromIF(CreditCardIFields[3]);
+    }
+    #endregion
+    #region Prefab Functions
+    public void RendezvousPrefab(int rendezvousType, GameObject rendezvousObj)
+    {
+        int N = rendezvousObj.transform.childCount;
+        switch (rendezvousType)
         {
-            case 0:
+            case 0: //Randevu Göstergeci Ýptalli
+
+                break;
+            case 1: //Randevu Göstergeci Ödeli
+
+                break;
+            case 2: //Randevu Göstergeci Randevu Allý
+
+                break;
+            case 3: //Randevu Göstergeci Görüntüleli
+
+                break;
+            case 4: //Randevu Göstergeci Paralý Ödenmemiþ
+                int counter = 0;
+                for (int i = 0; i < N; i++)
+                {
+                    if (rendezvousObj.transform.GetChild(i).TryGetComponent(out TextMeshProUGUI text))
+                    {
+                        switch (counter)
+                        {
+                            case 0:
+                                text.SetText("Poliklinik");
+                                break;
+                            case 1:
+                                text.SetText("Doktor Adý");
+                                break;
+                            case 2:
+                                text.SetText("Tarih");
+                                break;
+                            case 3:
+                                text.SetText("Fiyat");
+                                break;
+                        }
+                        counter++;
+                    }
+                }
+                break;
+            case 5: //Randevu Göstergeci Paralý Ödenmiþ
+
                 break;
         }
     }
