@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class Doktor
 {
-    public string Name { get; set; }
-    public string Surname { get; set; }
-    public string ID { get; set; }
-    public List<Randevu> RandevuList { get; set; }
+    public int Doktor_ID { get; set; }
+    public string Ad { get; set; }
+    public string Soyad { get; set; }
+    public string Klinik_ID { get; set; }
+    public int Muayene_Suresi { get; set; }
 }

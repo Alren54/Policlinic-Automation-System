@@ -5,10 +5,9 @@ using UnityEngine;
 
 public class Hasta
 {
-    public string ID { get; set; }
-    public string Name { get; set; }
-    public string Surname { get; set; }
-    public DateTime BirthDate { get; set; }
-    public bool isInsured { get; set; }
-    public List<Randevu> RandevuList { get; set; }
+    public string Hasta_ID { get; set; }
+    public string Ad { get; set; }
+    public string Soyad { get; set; }
+    public string Telefon { get; set; }
+    public string Sigorta_Durumu { get; set; }
 }
