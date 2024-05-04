@@ -1,10 +1,22 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
+using System.Text;
+using System.Linq;
+using Unity.VisualScripting;
+using System.Globalization;
 
 public class ButtonManager : MonoBehaviour
 {
+    [Header("TempVariables")]
+    [SerializeField] string currentUsername;
+    [SerializeField] string currentTC;
+
+    [Header("SQL Attributes")]
+    [SerializeField] DBManager DBManager;
+    [SerializeField] string dateFormat = "yyyy-MM-dd";
 
     [Header("Panels")]
     [SerializeField] private GameObject LoginPanel;
@@ -24,14 +36,28 @@ public class ButtonManager : MonoBehaviour
     [SerializeField] private List<GameObject> SettingsIFields;
     [SerializeField] private List<GameObject> CreditCardIFields;
 
+    [Header("Texts")]
+    [SerializeField] private List<TextMeshProUGUI> PatientMainScreenPanelTexts;
+    // object result = DBManager.dbManager.ExecuteQuery(4, DBManager.dbConnection, "SELECT * FROM user_info WHERE user_name = @param1", Username);
+
     #region Login Panel Buttons
     public void LP_LoginButton()
     {
-        string id = ConvertFromIF(LoginIFields[0]);
+        string tc = ConvertFromIF(LoginIFields[0]);
         string password = ConvertFromIF(LoginIFields[1]);
-        if (NotNull(id) && NotNull(password))
+        if (NotNull(tc) && NotNull(password))
         {
-
+            object a = DBManager.dbManager.ExecuteQuery(1, DBManager.dbConnection, "SELECT * FROM hasta WHERE tc = @param1 AND ÅŸifre = @param2", tc, password);
+            Tuple<bool, string, string> tuple = (Tuple<bool, string, string>)a;
+            
+            if (tuple.Item1)
+            {
+                currentUsername = string.Concat(tuple.Item2, ' ', tuple.Item3);
+                currentTC = string.Copy(tc);
+                LoginPanel.SetActive(false);
+                OnPatientMainScreenPanelEnable();
+                
+            }
         }
     }
 
@@ -44,14 +70,33 @@ public class ButtonManager : MonoBehaviour
     #region Register Panel Buttons
     public void RP_RegisterButton()
     {
-        string id = ConvertFromIF(RegisterIFields[0]);
+        int id = UnityEngine.Random.Range(1, 10000);
+        string tc = ConvertFromIF(RegisterIFields[0]);
         string name = ConvertFromIF(RegisterIFields[1]);
+        string[] str = name.Split(' ');
+        string surname = "";
+        StringBuilder sb = new StringBuilder();
+        if(str.Length > 0 )
+        {
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                sb.Append(str[i]);
+                sb.Append(' ');
+            }
+            name = string.Copy(sb.ToString());
+            surname = str[str.Length - 1];
+        }
         string birthday = ConvertFromIF(RegisterIFields[2]);
         string insurance = ConvertFromIF(RegisterIFields[3]);
         string password = ConvertFromIF(RegisterIFields[4]);
-        if (NotNull(id) && NotNull(name) && NotNull(birthday) && NotNull(insurance) && NotNull(password))
+        if (NotNull(tc) && NotNull(name) && NotNull(birthday) && NotNull(insurance) && NotNull(password) && NotNull(surname))
         {
-
+            DateTime bdate = DateTime.ParseExact(birthday, dateFormat, CultureInfo.GetCultureInfo("tr-TR"));
+            DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "INSERT INTO hasta VALUES(@param1, @param2, @param3, @param4, @param5, @param6, @param7)", id, name, surname, tc, password, bdate, insurance);
+            currentUsername = string.Concat(name, ' ', surname);
+            currentTC = string.Copy(tc);
+            OnPatientMainScreenPanelEnable();
+            RegisterPanel.SetActive(false);
         }
     }
     #endregion
@@ -119,25 +164,33 @@ public class ButtonManager : MonoBehaviour
         string CVV = ConvertFromIF(CreditCardIFields[3]);
     }
     #endregion
+    #region OnPanelEnables
+    private void OnPatientMainScreenPanelEnable()
+    {
+        PatientMainScreenPanelTexts[0].SetText(currentUsername);
+        PatientMainScreenPanelTexts[1].SetText(DateTime.Now.Date.ToString());
+        PatientMainScreenPanel.SetActive(true);
+    }
+    #endregion
     #region Prefab Functions
     public void RendezvousPrefab(int rendezvousType, GameObject rendezvousObj)
     {
         int N = rendezvousObj.transform.childCount;
         switch (rendezvousType)
         {
-            case 0: //Randevu Göstergeci Ýptalli
+            case 0: //Randevu GÃ¶stergeci Ãptalli
 
                 break;
-            case 1: //Randevu Göstergeci Ödeli
+            case 1: //Randevu GÃ¶stergeci Ã–deli
 
                 break;
-            case 2: //Randevu Göstergeci Randevu Allý
+            case 2: //Randevu GÃ¶stergeci Randevu AllÃ½
 
                 break;
-            case 3: //Randevu Göstergeci Görüntüleli
+            case 3: //Randevu GÃ¶stergeci GÃ¶rÃ¼ntÃ¼leli
 
                 break;
-            case 4: //Randevu Göstergeci Paralý Ödenmemiþ
+            case 4: //Randevu GÃ¶stergeci ParalÃ½ Ã–denmemiÃ¾
                 int counter = 0;
                 for (int i = 0; i < N; i++)
                 {
@@ -149,7 +202,7 @@ public class ButtonManager : MonoBehaviour
                                 text.SetText("Poliklinik");
                                 break;
                             case 1:
-                                text.SetText("Doktor Adý");
+                                text.SetText("Doktor AdÃ½");
                                 break;
                             case 2:
                                 text.SetText("Tarih");
@@ -162,7 +215,7 @@ public class ButtonManager : MonoBehaviour
                     }
                 }
                 break;
-            case 5: //Randevu Göstergeci Paralý Ödenmiþ
+            case 5: //Randevu GÃ¶stergeci ParalÃ½ Ã–denmiÃ¾
 
                 break;
         }

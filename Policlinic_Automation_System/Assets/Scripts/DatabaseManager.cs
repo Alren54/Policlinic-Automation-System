@@ -7,7 +7,7 @@ using TMPro;
 
 public class DatabaseManager
 {
-    private const string connectionString = "Host=127.0.0.1:5432;Username=postgres;Password=123456;Database=DermanDB;";
+    private const string connectionString = "Host=127.0.0.1:8086;Username=postgres;Password=123456;Database=DermanDB;";
     public NpgsqlConnection Connect()
     {
         NpgsqlConnection connection = new NpgsqlConnection(connectionString);
@@ -41,10 +41,14 @@ public class DatabaseManager
                 {
                     while (reader.Read())
                     {
+                        //reader.GetInt32(reader.GetOrdinal("user_id"));
                         switch (todo)
                         {
-                            case 0: //ID
-                                return reader.GetInt32(reader.GetOrdinal("user_id"));
+                            case 0: //Insert, Delete Queries
+                                return null;
+                            case 1: //Login Verification
+                                Tuple<bool, string, string> a = new Tuple<bool, string, string>(true, reader.GetString(reader.GetOrdinal("ad")), reader.GetString(reader.GetOrdinal("soyad")));
+                                return a;
                             default:
                                 break;
                         }
