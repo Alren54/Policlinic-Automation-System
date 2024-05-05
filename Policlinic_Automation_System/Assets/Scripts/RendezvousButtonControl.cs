@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class RendezvousButtonControl : MonoBehaviour
 {
-    [SerializeField] private ButtonManager buttonManager;
+    [HideInInspector] public ButtonManager buttonManager;
+    [HideInInspector] public int buttonID;
     public void RendezvousButton(int element)
     {
-        buttonManager.RendezvousPrefab(element, transform.parent.gameObject);
+        buttonManager.RendezvousPrefab(element, buttonID, transform.parent.gameObject);
     }
 }
