@@ -4,6 +4,8 @@ using UnityEngine;
 using Npgsql;
 using System;
 using TMPro;
+using System.Text;
+using Unity.VisualScripting.FullSerializer;
 
 public class DatabaseManager
 {
@@ -41,6 +43,29 @@ public class DatabaseManager
                 {
                     int counter = 0;
                     List<Tuple<string, string, DateTime, int, float?>> rendezvousList1 = new();
+                    List<Tuple<string, string, DateTime, int, float?, bool>> debtsList = new();
+                    List<Tuple<string, List<DateTime>, int>> rendezvousList2 = new();
+                    List<string> strInputs = new();
+                    List<DateTime> rendezvousDates = new List<DateTime> {
+                        new DateTime(1, 1, 1, 9, 0, 0),
+                        new DateTime(1, 1, 1, 9, 30, 0),
+                        new DateTime(1, 1, 1, 10, 0, 0),
+                        new DateTime(1, 1, 1, 10, 30, 0),
+                        new DateTime(1, 1, 1, 11, 0, 0),
+                        new DateTime(1, 1, 1, 11, 30, 0),
+                        new DateTime(1, 1, 1, 12, 0, 0),
+                        new DateTime(1, 1, 1, 12, 30, 0),
+                        new DateTime(1, 1, 1, 13, 0, 0),
+                        new DateTime(1, 1, 1, 13, 30, 0),
+                        new DateTime(1, 1, 1, 14, 0, 0),
+                        new DateTime(1, 1, 1, 14, 30, 0),
+                        new DateTime(1, 1, 1, 15, 0, 0),
+                        new DateTime(1, 1, 1, 15, 30, 0),
+                        new DateTime(1, 1, 1, 16, 0, 0)
+                    };
+                    Tuple<string, DateTime, int> rendezvous = null;
+                    Tuple<string, DateTime, int> oldRendezvous = null;
+                    int tempInt = -1;
                     while (reader.Read())
                     {
                         counter++;
@@ -64,22 +89,78 @@ public class DatabaseManager
                             case 5: //For Counters
 
                                 break;
-                            case 6:
+                            case 6: //For Taking Rendezvous
+                                rendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                if (tempInt == -1)
+                                {
+                                    oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                    tempInt = oldRendezvous.Item3;
+                                }
 
+                                if (tempInt == rendezvous.Item3)
+                                {
+                                    rendezvousDates.Remove(new DateTime(1, 1, 1, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                }
+                                else if (tempInt != rendezvous.Item3)
+                                {
+                                    rendezvousList2.Add(new(oldRendezvous.Item1, rendezvousDates, oldRendezvous.Item3));
+                                    oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                    rendezvousDates = new List<DateTime> {
+                                        new DateTime(1, 1, 1, 9, 0, 0),
+                                        new DateTime(1, 1, 1, 9, 30, 0),
+                                        new DateTime(1, 1, 1, 10, 0, 0),
+                                        new DateTime(1, 1, 1, 10, 30, 0),
+                                        new DateTime(1, 1, 1, 11, 0, 0),
+                                        new DateTime(1, 1, 1, 11, 30, 0),
+                                        new DateTime(1, 1, 1, 12, 0, 0),
+                                        new DateTime(1, 1, 1, 12, 30, 0),
+                                        new DateTime(1, 1, 1, 13, 0, 0),
+                                        new DateTime(1, 1, 1, 13, 30, 0),
+                                        new DateTime(1, 1, 1, 14, 0, 0),
+                                        new DateTime(1, 1, 1, 14, 30, 0),
+                                        new DateTime(1, 1, 1, 15, 0, 0),
+                                        new DateTime(1, 1, 1, 15, 30, 0),
+                                        new DateTime(1, 1, 1, 16, 0, 0)
+                                    };
+                                    rendezvousDates.Remove(new DateTime(1, 1, 1, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                    Debug.Log(oldRendezvous.Item1);
+                                    Debug.Log(oldRendezvous.Item3);
+                                    tempInt = oldRendezvous.Item3;
+                                }
+                                tempInt = rendezvous.Item3;
                                 break;
+                            case 7:
+                                debtsList.Add(new Tuple<string, string, DateTime, int, float?, bool>(reader.GetString(0), reader.GetString(1), reader.GetDateTime(2), reader.GetInt32(3), reader.GetFloat(4), reader.GetBoolean(5)));
+                                break;
+                            case 8:
+                                strInputs.Add(reader.GetString(0));
+                                strInputs.Add(reader.GetString(1));
+                                strInputs.Add(reader.GetDateTime(2).ToString());
+                                strInputs.Add(reader.GetInt32(3).ToString());
+                                strInputs.Add(reader.GetString(4));
+                                strInputs.Add(reader.GetString(5));
+                                strInputs.Add(reader.GetString(6));
+                                strInputs.Add(reader.GetString(7));
+                                strInputs.Add(reader.GetFloat(8).ToString());
+                                return strInputs;
+                            case 9:
+                                strInputs.Add(reader.GetString(0));
+                                strInputs.Add(reader.GetString(1));
+                                strInputs.Add(reader.GetDateTime(2).ToString());
+                                strInputs.Add(reader.GetFloat(3).ToString());
+                                return strInputs;
                             default:
                                 break;
                         }
                     }
-                    if (todo == 3 || todo == 4)
+                    if (todo == 3 || todo == 4) return rendezvousList1;
+                    else if (todo == 5) return counter;
+                    else if (todo == 6)
                     {
-                        return rendezvousList1;
+                        if (rendezvous != null) rendezvousList2.Add(new(rendezvous.Item1, rendezvousDates, rendezvous.Item3));
+                        return rendezvousList2;
                     }
-                    else if (todo == 5)
-                    {
-                        return counter;
-                    }
-
+                    else if (todo == 7) { return debtsList; }
                 }
             }
             return false;
