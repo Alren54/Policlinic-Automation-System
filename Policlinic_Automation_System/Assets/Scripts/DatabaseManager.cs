@@ -47,21 +47,21 @@ public class DatabaseManager
                     List<Tuple<string, List<DateTime>, int>> rendezvousList2 = new();
                     List<string> strInputs = new();
                     List<DateTime> rendezvousDates = new List<DateTime> {
-                        new DateTime(1, 1, 1, 9, 0, 0),
-                        new DateTime(1, 1, 1, 9, 30, 0),
-                        new DateTime(1, 1, 1, 10, 0, 0),
-                        new DateTime(1, 1, 1, 10, 30, 0),
-                        new DateTime(1, 1, 1, 11, 0, 0),
-                        new DateTime(1, 1, 1, 11, 30, 0),
-                        new DateTime(1, 1, 1, 12, 0, 0),
-                        new DateTime(1, 1, 1, 12, 30, 0),
-                        new DateTime(1, 1, 1, 13, 0, 0),
-                        new DateTime(1, 1, 1, 13, 30, 0),
-                        new DateTime(1, 1, 1, 14, 0, 0),
-                        new DateTime(1, 1, 1, 14, 30, 0),
-                        new DateTime(1, 1, 1, 15, 0, 0),
-                        new DateTime(1, 1, 1, 15, 30, 0),
-                        new DateTime(1, 1, 1, 16, 0, 0)
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 13, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 13, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 0, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 30, 0),
+                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0)
                     };
                     Tuple<string, DateTime, int> rendezvous = null;
                     Tuple<string, DateTime, int> oldRendezvous = null;
@@ -99,30 +99,30 @@ public class DatabaseManager
 
                                 if (tempInt == rendezvous.Item3)
                                 {
-                                    rendezvousDates.Remove(new DateTime(1, 1, 1, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                    rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
                                 }
                                 else if (tempInt != rendezvous.Item3)
                                 {
                                     rendezvousList2.Add(new(oldRendezvous.Item1, rendezvousDates, oldRendezvous.Item3));
                                     oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
                                     rendezvousDates = new List<DateTime> {
-                                        new DateTime(1, 1, 1, 9, 0, 0),
-                                        new DateTime(1, 1, 1, 9, 30, 0),
-                                        new DateTime(1, 1, 1, 10, 0, 0),
-                                        new DateTime(1, 1, 1, 10, 30, 0),
-                                        new DateTime(1, 1, 1, 11, 0, 0),
-                                        new DateTime(1, 1, 1, 11, 30, 0),
-                                        new DateTime(1, 1, 1, 12, 0, 0),
-                                        new DateTime(1, 1, 1, 12, 30, 0),
-                                        new DateTime(1, 1, 1, 13, 0, 0),
-                                        new DateTime(1, 1, 1, 13, 30, 0),
-                                        new DateTime(1, 1, 1, 14, 0, 0),
-                                        new DateTime(1, 1, 1, 14, 30, 0),
-                                        new DateTime(1, 1, 1, 15, 0, 0),
-                                        new DateTime(1, 1, 1, 15, 30, 0),
-                                        new DateTime(1, 1, 1, 16, 0, 0)
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 12, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 13, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 13, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 14, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 0, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 30, 0),
+                                        new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0)
                                     };
-                                    rendezvousDates.Remove(new DateTime(1, 1, 1, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                    rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
                                     Debug.Log(oldRendezvous.Item1);
                                     Debug.Log(oldRendezvous.Item3);
                                     tempInt = oldRendezvous.Item3;
@@ -151,6 +151,16 @@ public class DatabaseManager
                                 return strInputs;
                             default:
                                 break;
+                            case 10:
+                                Tuple<bool, string, string, int> b = new Tuple<bool, string, string, int>
+                                    (true, reader.GetString(reader.GetOrdinal("Ad")), reader.GetString(reader.GetOrdinal("Soyad")), reader.GetInt32(reader.GetOrdinal("Doktor_id")));
+                                return b;
+                            case 11:
+                                strInputs.Add(reader.GetString(0));
+                                strInputs.Add("Tc No: " + reader.GetString(1));
+                                strInputs.Add(reader.GetDateTime(2).Date.ToString());
+                                strInputs.Add("Randevu ID = " + reader.GetInt32(3).ToString());
+                                return strInputs;
                         }
                     }
                     if (todo == 3 || todo == 4) return rendezvousList1;
