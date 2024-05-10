@@ -989,6 +989,7 @@ GameObject:
   - component: {fileID: 5818729543638361462}
   - component: {fileID: 3859069430754425337}
   - component: {fileID: 2666286542388467128}
+  - component: {fileID: 1282414397616940713}
   m_Layer: 5
   m_Name: "\xD6dendi Button"
   m_TagString: Untagged
@@ -1054,3 +1055,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1282414397616940713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8179697174877800220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a94bd14247e073e40beb3677decab94f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonManager: {fileID: 0}
+  buttonID: 0

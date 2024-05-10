@@ -40,10 +40,20 @@ public class ButtonManager : MonoBehaviour
     [SerializeField] private GameObject DoctorExhibitionsPanel;
     [SerializeField] private GameObject DoctorExInfoPanel;
     [SerializeField] private GameObject TcInfoPanel;
+    [SerializeField] private GameObject RegisterDocPanel;
+    [SerializeField] private GameObject DocSettingsPanel;
+
+    [Header("Objects")]
+    [SerializeField] private GameObject CC;
+    [SerializeField] private TMP_Dropdown poliDropdown;
+    [SerializeField] private TMP_Dropdown docDropdown;
+    [SerializeField] private Toggle poliToggle;
+    [SerializeField] private Toggle docToggle;
 
     [Header("Input Fields")]
     [SerializeField] private List<GameObject> LoginIFields;
     [SerializeField] private List<GameObject> RegisterIFields;
+    [SerializeField] private List<GameObject> RegisterDocIFields;
     [SerializeField] private List<GameObject> SettingsIFields;
     [SerializeField] private List<GameObject> CreditCardIFields;
     [SerializeField] private List<GameObject> DoExaminationPanelIFields;
@@ -59,7 +69,7 @@ public class ButtonManager : MonoBehaviour
     [SerializeField] private List<TextMeshProUGUI> PayingTexts;
     [SerializeField] private List<TextMeshProUGUI> SettingsTexts;
     [SerializeField] private List<TextMeshProUGUI> DoctorMainScreenTexts;
-    [SerializeField] private List<TextMeshProUGUI> DoExaminationPanelTexts;
+    [SerializeField] private List<TextMeshProUGUI> DoExaminationTexts;
     [SerializeField] private List<TextMeshProUGUI> DoctorExhibitionsTexts;
     [SerializeField] private List<TextMeshProUGUI> DoctorExInfoTexts;
     [SerializeField] private List<TextMeshProUGUI> TcInfoTexts;
@@ -77,9 +87,27 @@ public class ButtonManager : MonoBehaviour
     [SerializeField] private List<GameObject> RendezvousPrefabs;
     private void Start()
     {
-
+        poliToggle.onValueChanged.AddListener(delegate {
+            ToggleValueChanged();
+        });
+        docToggle.onValueChanged.AddListener(delegate {
+            ToggleValueChanged();
+        });
+        poliDropdown.onValueChanged.AddListener(delegate {
+            ToggleValueChanged();
+        });
+        docDropdown.onValueChanged.AddListener(delegate {
+            ToggleValueChanged();
+        });
     }
-
+    public void QuitFromApp()
+    {
+        Application.Quit();
+    }
+    void ToggleValueChanged()
+    {
+        OnPatientTakeRendezvousPanelEnable();
+    }
     #region Login Panel Buttons
     public void LP_ChangeUser()
     {
@@ -120,7 +148,11 @@ public class ButtonManager : MonoBehaviour
     public void LP_RegisterButton()
     {
         LoginPanel.SetActive(false);
-        RegisterPanel.SetActive(true);
+        if (!isPatient)
+        {
+            RegisterDocPanel.SetActive(true);
+        }
+        else RegisterPanel.SetActive(true);
     }
     #endregion
     #region Register Panel Buttons
@@ -157,8 +189,43 @@ public class ButtonManager : MonoBehaviour
             RegisterPanel.SetActive(false);
         }
     }
+    public void RP_DocRegisterButton()
+    {
+        string tc = ConvertFromIF(RegisterDocIFields[0]);
+        string name = ConvertFromIF(RegisterDocIFields[1]);
+        string[] str = name.Split(' ');
+        string surname = "";
+        StringBuilder sb = new StringBuilder();
+        if (str.Length > 0)
+        {
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                sb.Append(str[i]);
+                sb.Append(' ');
+            }
+            name = string.Copy(sb.ToString());
+            surname = str[str.Length - 1];
+        }
+        string password = ConvertFromIF(RegisterDocIFields[2]);
+        if (NotNull(tc) && NotNull(name) && NotNull(password) && NotNull(surname))
+        {
+            DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "INSERT INTO Doktor (Ad, Soyad, Tc, Sifre) VALUES(@param1, @param2, @param3, @param4)", name, surname, tc, password);
+            int id = (int)DBManager.dbManager.ExecuteQuery(2, DBManager.dbConnection, "SELECT Doktor_id FROM Hasta WHERE @param1 = tc", tc);
+            currentUsername = string.Concat(name, ' ', surname);
+            currentID = id;
+            print(currentID);
+            OnDoctorMainScreenPanelEnable();
+            RegisterPanel.SetActive(false);
+        }
+    }
     #endregion
     #region Side Panel Buttons
+    public void SidePanel_MainScreenButton()
+    {
+        CloseAllPanels();
+        PatientMainScreenPanel.SetActive(true);
+        OnPatientTakeRendezvousPanelEnable();
+    }
     public void SidePanel_TakeRendezvousButton()
     {
         CloseAllPanels();
@@ -210,6 +277,11 @@ public class ButtonManager : MonoBehaviour
         TcInfoPanel.SetActive(true);
         OnTcInfoPanelEnable();
     }
+    public void SidePanel_DocSettingsPanel()
+    {
+        CloseAllPanels();
+        DocSettingsPanel.SetActive(true);
+    }
     #endregion
     #region Settings Panel Buttons
     public void SetP_UpdatePassword()
@@ -218,7 +290,11 @@ public class ButtonManager : MonoBehaviour
         string password2 = ConvertFromIF(SettingsIFields[1]);
         if (string.Equals(password, password2))
         {
-            DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "UPDATE Hasta SET Sifre = @param1 WHERE Hasta_id = @param2", password, currentID);
+            if(isPatient)
+                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "UPDATE Hasta SET Sifre = @param1 WHERE Hasta_id = @param2", password, currentID);
+            else
+                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "UPDATE Doktor SET Sifre = @param1 WHERE Doktor_id = @param2", password, currentID);
+
             print("is set");
         }
         else print("is not set");
@@ -357,10 +433,19 @@ public class ButtonManager : MonoBehaviour
         PatientMainScreenTexts[0].SetText(currentUsername);
         PatientMainScreenTexts[1].SetText(DateTime.Now.ToString());
 
+        List<string> poliklinik = (List<string>)DBManager.dbManager.ExecuteQuery(12, DBManager.dbConnection, "SELECT p.İsim FROM Polikinlik p");
+        poliDropdown.ClearOptions();
+        poliDropdown.AddOptions(poliklinik);
+
+        List<string> doc = (List<string>)DBManager.dbManager.ExecuteQuery(12, DBManager.dbConnection, "SELECT d.Ad FROM Doktor d");
+        docDropdown.ClearOptions();
+        docDropdown.AddOptions(doc);
+
         GameObject obj;
         List<Tuple<string, string, DateTime, int, float?>> tempTuple = (List<Tuple<string, string, DateTime, int, float?>>)DBManager.dbManager.ExecuteQuery(3, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id FROM Hasta h, Polikinlik p, Doktor d, Muayene_randevu m, Muayene mu WHERE m.Muayene_id = mu.Muayene_id AND mu.isMuayeneEdildi = @param1 AND m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND  h.Hasta_id = @param2 AND m.Randevu_tarih > @param3", false, currentID, DateTime.Now);
         Muayene_randevu_ids.Clear();
         Muayene_randevu_ids.Add(new List<int>());
+
         int count = tempTuple.Count;
         for (int i = 0; i < count; i++)
         {
@@ -405,7 +490,7 @@ public class ButtonManager : MonoBehaviour
         PatientMainScreenTexts[2].SetText($"Bu hafta {count} randevunuz bulunuyor.");
 
         tempTuple.Clear();
-        tempTuple = (List<Tuple<string, string, DateTime, int, float?>>)DBManager.dbManager.ExecuteQuery(3, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id FROM Hasta h, Polikinlik p, Doktor d, Muayene_randevu m, Odeme o, Muayene mu WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND h.Hasta_id = @param1 AND m.Muayene_id = mu.Muayene_id AND mu.Odeme_id = o.Odeme_id AND o.isOdendi = false", currentID);
+        tempTuple = (List<Tuple<string, string, DateTime, int, float?>>)DBManager.dbManager.ExecuteQuery(3, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id FROM Hasta h, Polikinlik p, Doktor d, Muayene_randevu m, Odeme o, Muayene mu WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND h.Hasta_id = @param1 AND m.Muayene_id = mu.Muayene_id AND mu.Odeme_id = o.Odeme_id AND o.isOdendi = false AND mu.isMuayeneEdildi = true", currentID);
         Muayene_randevu_ids.Add(new List<int>());
         int totalCount = 0;
         count = tempTuple.Count;
@@ -460,8 +545,23 @@ public class ButtonManager : MonoBehaviour
         }
         PatientTakeRendezvousTexts[0].SetText(currentUsername);
         GameObject obj;
+
+
+
         availableRendezvous.Clear();
-        availableRendezvous = (List<Tuple<string, List<DateTime>, int>>)DBManager.dbManager.ExecuteQuery(6, DBManager.dbConnection, "SELECT d.Ad, m.Randevu_tarih, d.Doktor_id FROM Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id ORDER BY d.Doktor_id");
+
+        int poliValue = poliDropdown.value;
+        string poliStr = poliDropdown.options[poliValue].text;
+
+
+        int docValue = docDropdown.value;
+        string docStr = docDropdown.options[docValue].text;
+
+        if (!poliToggle.isOn && !docToggle.isOn) availableRendezvous = (List<Tuple<string, List<DateTime>, int>>)DBManager.dbManager.ExecuteQuery(6, DBManager.dbConnection, "SELECT d.Ad, m.Randevu_tarih, d.Doktor_id FROM Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id ORDER BY d.Doktor_id");
+        else if(poliToggle.isOn && !docToggle.isOn) availableRendezvous = (List<Tuple<string, List<DateTime>, int>>)DBManager.dbManager.ExecuteQuery(6, DBManager.dbConnection, "SELECT d.Ad, m.Randevu_tarih, d.Doktor_id FROM Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND p.İsim = @param1 ORDER BY d.Doktor_id", poliStr);
+        else if(!poliToggle.isOn && docToggle.isOn) availableRendezvous = (List<Tuple<string, List<DateTime>, int>>)DBManager.dbManager.ExecuteQuery(6, DBManager.dbConnection, "SELECT d.Ad, m.Randevu_tarih, d.Doktor_id FROM Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND d.ad = @param1 ORDER BY d.Doktor_id", docStr);
+        else availableRendezvous = (List<Tuple<string, List<DateTime>, int>>)DBManager.dbManager.ExecuteQuery(6, DBManager.dbConnection, "SELECT d.Ad, m.Randevu_tarih, d.Doktor_id FROM Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND d.ad = @param1 AND p.İsim = @param2 ORDER BY d.Doktor_id", docStr, poliStr);
+        
         Muayene_randevu_ids.Clear();
         Muayene_randevu_ids.Add(new List<int>());
         int count = availableRendezvous.Count;
@@ -510,9 +610,9 @@ public class ButtonManager : MonoBehaviour
             }
         }
         PatientExaminationTexts[0].SetText(currentUsername);
-        int buttonCounter;
+        int buttonCounter = 0;
         GameObject obj;
-        List<Tuple<string, string, DateTime, int, float?>> tempTuple = (List<Tuple<string, string, DateTime, int, float?>>)DBManager.dbManager.ExecuteQuery(3, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id FROM Hasta h, Polikinlik p, Doktor d, Muayene_randevu m WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND h.Hasta_id = @param1 AND m.Randevu_tarih < @param2", currentID, DateTime.Now);
+        List<Tuple<string, string, DateTime, int, float?>> tempTuple = (List<Tuple<string, string, DateTime, int, float?>>)DBManager.dbManager.ExecuteQuery(3, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id FROM Hasta h, Polikinlik p, Doktor d, Muayene_randevu m, Muayene mu, Odeme o WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND h.Hasta_id = @param1 AND m.Muayene_id = mu.Muayene_id AND mu.isMuayeneEdildi = @param2 AND mu.Odeme_id = o.Odeme_id AND o.isOdendi = @param3 ", currentID, true, true);
         Muayene_randevu_ids.Clear();
         Muayene_randevu_ids.Add(new List<int>());
         int count = tempTuple.Count;
@@ -523,7 +623,6 @@ public class ButtonManager : MonoBehaviour
             Muayene_randevu_ids[0].Add(tempTuple[i].Item4);
             int N = obj.transform.childCount;
             int counter = 0;
-            buttonCounter = 0;
             for (int j = 0; j < N; j++)
             {
                 if (obj.transform.GetChild(j).TryGetComponent(out TextMeshProUGUI text))
@@ -580,12 +679,12 @@ public class ButtonManager : MonoBehaviour
     private void OnDoExaminationPanelEnable(int rendezvousID)
     {
         currentRendezvousID = rendezvousID;
-        PayingTexts[0].SetText(currentUsername);
+        DoExaminationTexts[0].SetText(currentUsername);
 
         List<string> tempTuple = (List<string>)DBManager.dbManager.ExecuteQuery(11, DBManager.dbConnection, "SELECT h.Ad, h.Tc, m.Randevu_tarih, m.Muayene_randevu_id FROM Muayene_randevu m, Hasta h WHERE m.Muayene_randevu_id = @param1 AND h.Hasta_id = m.Hasta_id ", rendezvousID);
         for (int i = 0; i < tempTuple.Count; i++)
         {
-            PayingTexts[i + 1].SetText(tempTuple[i]);
+            DoExaminationTexts[i + 1].SetText(tempTuple[i]);
         }
     }
     private void OnDebtsPanelEnable()
@@ -600,7 +699,7 @@ public class ButtonManager : MonoBehaviour
         }
 
         DebtsTexts[0].SetText(currentUsername);
-        int buttonCounter;
+        int buttonCounter = 0;
         GameObject obj;
         List<Tuple<string, string, DateTime, int, float?, bool>> tempTuple = (List<Tuple<string, string, DateTime, int, float?, bool>>)DBManager.dbManager.ExecuteQuery(7, DBManager.dbConnection, "SELECT p.İsim, d.Ad, m.Randevu_tarih, m.Muayene_randevu_id, o.Ucret, o.isOdendi FROM Odeme o, Hasta h, Polikinlik p, Doktor d, Muayene_randevu m, Muayene mu WHERE m.Doktor_id = d.Doktor_id AND d.Polikinlik_id = p.Polikinlik_id AND m.Hasta_id = h.Hasta_id AND h.Hasta_id = @param1 AND m.Muayene_id = mu.Muayene_id AND mu.Odeme_id = o.Odeme_id AND mu.isMuayeneEdildi = @param2", currentID, true);
         Muayene_randevu_ids.Clear();
@@ -615,7 +714,6 @@ public class ButtonManager : MonoBehaviour
             Muayene_randevu_ids[0].Add(tempTuple[i].Item4);
             int N = obj.transform.childCount;
             int counter = 0;
-            buttonCounter = 0;
             for (int j = 0; j < N; j++)
             {
                 if (obj.transform.GetChild(j).TryGetComponent(out TextMeshProUGUI text))
@@ -658,12 +756,20 @@ public class ButtonManager : MonoBehaviour
     private void OnSettingsPanelEnable()
     {
         SettingsTexts[0].SetText(currentUsername);
-        List<string> tempTuple = (List<string>)DBManager.dbManager.ExecuteQuery(9, DBManager.dbConnection, "SELECT k.karttaki_isim, k.kart_no, k.kart_son_kullanma_tarihi, k.cvv FROM KrediKarti k, Hasta h WHERE h.Hasta_id = @param1 AND k.Hasta_id = h.Hasta_id", currentID);
+        if (isPatient)
+        {
+            List<string> tempTuple = (List<string>)DBManager.dbManager.ExecuteQuery(9, DBManager.dbConnection, "SELECT k.karttaki_isim, k.kart_no, k.kart_son_kullanma_tarihi, k.cvv FROM KrediKarti k, Hasta h WHERE h.Hasta_id = @param1 AND k.Hasta_id = h.Hasta_id", currentID);
+            CC.SetActive(true);
+            SettingsIFields[2].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[0]);
+            SettingsIFields[3].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[1]);
+            SettingsIFields[4].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[2]);
+            SettingsIFields[5].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[3]);
+        }
+        else
+        {
+            CC.SetActive(false);
+        }
 
-        SettingsIFields[2].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[0]);
-        SettingsIFields[3].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[1]);
-        SettingsIFields[4].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[2]);
-        SettingsIFields[5].GetComponent<TMP_InputField>().SetTextWithoutNotify(tempTuple[3]);
     }
     private void OnDoctorMainScreenPanelEnable()
     {
@@ -850,7 +956,13 @@ public class ButtonManager : MonoBehaviour
             case 4:
                 DebtsPanel.SetActive(false);
                 PayingPanel.SetActive(true);
-                OnPayingPanelEnable(rendezvousID);
+                pressedButton = Muayene_randevu_ids[0][rendezvousID];
+                print(rendezvousID);
+                foreach(var a in Muayene_randevu_ids[0])
+                {
+                    print(a);
+                }
+                OnPayingPanelEnable(pressedButton);
                 print("Ödemeye girildi 2");
                 break;
             case 5:
@@ -860,9 +972,10 @@ public class ButtonManager : MonoBehaviour
                 OnExaminationInfoPanelEnable(pressedButton);
                 break;
             case 6:
-                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Odeme WHERE Odeme_id = @param1 ", rendezvousID);
-                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Muayene WHERE Odeme_id = @param1 ", rendezvousID);
-                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Muayene_randevu WHERE Muayene_id = @param1 ", rendezvousID);
+                pressedButton = Muayene_randevu_ids[0][rendezvousID];
+                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Muayene_randevu WHERE Muayene_randevu_id = @param1 ", pressedButton);
+                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Muayene WHERE Muayene_id = @param1 ", pressedButton);
+                DBManager.dbManager.ExecuteQuery(0, DBManager.dbConnection, "DELETE FROM Odeme WHERE Odeme_id = @param1 ", pressedButton);
                 Destroy(rendezvousObject);
                 break;
             case 7:
@@ -914,6 +1027,8 @@ public class ButtonManager : MonoBehaviour
         DoExaminationPanel.SetActive(false);
         DoctorExhibitionsPanel.SetActive(false);
         DoctorExInfoPanel.SetActive(false);
+        TcInfoPanel.SetActive(false);
+        RegisterDocPanel.SetActive(false);
     }
 
     private string ConvertFromIF(GameObject Ifield)

@@ -90,22 +90,22 @@ public class DatabaseManager
 
                                 break;
                             case 6: //For Taking Rendezvous
-                                rendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
-                                if (tempInt == -1)
-                                {
-                                    oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
-                                    tempInt = oldRendezvous.Item3;
-                                }
+                                    rendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                    if (tempInt == -1)
+                                    {
+                                        oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                        tempInt = oldRendezvous.Item3;
+                                    }
 
-                                if (tempInt == rendezvous.Item3)
-                                {
-                                    rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
-                                }
-                                else if (tempInt != rendezvous.Item3)
-                                {
-                                    rendezvousList2.Add(new(oldRendezvous.Item1, rendezvousDates, oldRendezvous.Item3));
-                                    oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
-                                    rendezvousDates = new List<DateTime> {
+                                    if (tempInt == rendezvous.Item3)
+                                    {
+                                        rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                    }
+                                    else if (tempInt != rendezvous.Item3)
+                                    {
+                                        rendezvousList2.Add(new(oldRendezvous.Item1, rendezvousDates, oldRendezvous.Item3));
+                                        oldRendezvous = new Tuple<string, DateTime, int>(reader.GetString(0), reader.GetDateTime(1), reader.GetInt32(2));
+                                        rendezvousDates = new List<DateTime> {
                                         new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 0, 0),
                                         new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 9, 30, 0),
                                         new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 10, 0, 0),
@@ -122,12 +122,13 @@ public class DatabaseManager
                                         new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 30, 0),
                                         new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 16, 0, 0)
                                     };
-                                    rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
-                                    Debug.Log(oldRendezvous.Item1);
-                                    Debug.Log(oldRendezvous.Item3);
-                                    tempInt = oldRendezvous.Item3;
-                                }
-                                tempInt = rendezvous.Item3;
+                                        rendezvousDates.Remove(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, rendezvous.Item2.Hour, rendezvous.Item2.Minute, rendezvous.Item2.Second));
+                                        Debug.Log(oldRendezvous.Item1);
+                                        Debug.Log(oldRendezvous.Item3);
+                                        tempInt = oldRendezvous.Item3;
+                                    }
+                                    tempInt = rendezvous.Item3;
+
                                 break;
                             case 7:
                                 debtsList.Add(new Tuple<string, string, DateTime, int, float?, bool>(reader.GetString(0), reader.GetString(1), reader.GetDateTime(2), reader.GetInt32(3), reader.GetFloat(4), reader.GetBoolean(5)));
@@ -136,7 +137,7 @@ public class DatabaseManager
                                 strInputs.Add(reader.GetString(0));
                                 strInputs.Add(reader.GetString(1));
                                 strInputs.Add(reader.GetDateTime(2).ToString());
-                                strInputs.Add(reader.GetInt32(3).ToString());
+                                strInputs.Add("Randevu ID: " + reader.GetInt32(3).ToString());
                                 strInputs.Add(reader.GetString(4));
                                 strInputs.Add(reader.GetString(5));
                                 strInputs.Add(reader.GetString(6));
@@ -158,9 +159,12 @@ public class DatabaseManager
                             case 11:
                                 strInputs.Add(reader.GetString(0));
                                 strInputs.Add("Tc No: " + reader.GetString(1));
-                                strInputs.Add(reader.GetDateTime(2).Date.ToString());
+                                strInputs.Add(reader.GetDateTime(2).ToString());
                                 strInputs.Add("Randevu ID = " + reader.GetInt32(3).ToString());
                                 return strInputs;
+                            case 12:
+                                strInputs.Add (reader.GetString(0));
+                                break;
                         }
                     }
                     if (todo == 3 || todo == 4) return rendezvousList1;
@@ -171,6 +175,7 @@ public class DatabaseManager
                         return rendezvousList2;
                     }
                     else if (todo == 7) { return debtsList; }
+                    else if (todo == 12) { return strInputs; }
                 }
             }
             return false;
